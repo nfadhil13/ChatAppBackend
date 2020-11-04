@@ -2,6 +2,8 @@ const io = require('../socket');
 
 const Room = require('../model/room')
 
+const mongoose = require('mongoose');
+
 const { v4: uuidv4 } = require('uuid');
 
 
@@ -91,8 +93,13 @@ exports.newMessage = async (req , res ,next) => {
         })
 
     }catch(err){
-        console.log(err);
-        next(err)
+        if(err instanceof mongoose.Error.CastError){
+            const error = new Error('Invalid Room ID code');
+            error.statusCode = 422;
+            next(error)
+        }else{
+            next(err)
+        }
     }
 }
 
@@ -101,9 +108,10 @@ exports.joinRoom = async (req , res ,next) => {
         const username = req.body.username;
         const roomId = req.body.roomId;
 
-        console.log(roomId);
-
+        
         const room = await Room.findById(roomId);
+
+
 
         if(!room){
             const error = new Error('Room is not exist');
@@ -129,12 +137,96 @@ exports.joinRoom = async (req , res ,next) => {
             message : 'Success Join',
             data : {
                 user,
+                roomId
+            }
+        })
+
+    }catch(err){
+        if(err instanceof mongoose.Error.CastError){
+            const error = new Error('Invalid Room ID code');
+            error.statusCode = 422;
+            next(error)
+        }else{
+            next(err)
+        }
+    }
+}
+
+exports.isRoomExist =  async (req , res ,next) => {
+    try{
+        const roomId = req.params.roomId
+
+
+
+        const room = await Room.findById(roomId);
+
+        if(!room){
+            const error = new Error('Room is not exist');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        res.status(201).send({
+            message : 'Room is Exist',
+            data : {
+                isRoomExist : true,
                 room
             }
         })
 
     }catch(err){
-        console.log(err);
-        next(err)
+        if(err instanceof mongoose.Error.CastError){
+            const error = new Error('Invalid Room ID code');
+            error.statusCode = 422;
+            next(error)
+        }else{
+            next(err)
+        }
+    }
+}
+
+exports.isUserInRoom = async (req , res ,next) => {
+    try{
+        const userId = req.body.userId;
+        const roomId = req.body.roomId;
+
+
+
+        const room = await Room.findById(roomId);
+
+        if(!room){
+            const error = new Error('Room is not exist');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const user  = room.users.find((user)=> {
+            console.log(userId)
+            console.log(user)
+            return user.id  === userId
+        })
+
+        if(!user){
+            const error = new Error('This user isnt included in this chat room');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        res.status(201).send({
+            messasge : 'User is in room',
+            data   : {
+                isUserInRoom : true,
+                user
+            }
+        })
+
+    }catch(err){
+        if(err instanceof mongoose.Error.CastError){
+            const error = new Error('Invalid Room ID code');
+            error.statusCode = 422;
+            next(error)
+        }else{
+            next(err)
+        }
     }
 }

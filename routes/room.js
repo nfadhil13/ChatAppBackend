@@ -10,5 +10,9 @@ router.post('/new', roomController.newRoom);
 router.post('/newmessage' , roomController.newMessage);
 
 router.post('/join' , roomController.joinRoom);
+
+router.get('/checkroom/:roomId' , roomController.isRoomExist);
+
+router.post('/isuserinroom' , roomController.isUserInRoom);
      
 module.exports = router

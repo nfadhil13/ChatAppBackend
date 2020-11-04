@@ -19,7 +19,7 @@ app.use('/room' , roomRoutes);
 
 app.use((err , req , res ,next) => {
     const message = err.message || 'Unknown'
-    const statusCode = err.statusCode || 501
+    const statusCode = err.statusCode || 500
     res.status(statusCode).json({
         message,
         statusCode
