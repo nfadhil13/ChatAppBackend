@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 const { v4: uuidv4 } = require('uuid');
 
+const sleep = require('util').promisify(setTimeout);
 
 exports.newRoom = async (req , res ,next) => {
     try{
@@ -46,7 +47,10 @@ exports.newMessage = async (req , res ,next) => {
     try{
         const userId = req.body.userId;
         const message  = req.body.message;
+        console.log(req.body.sendedTime);
+        const sendedTime = req.body.sendedTime || new Date();
         const roomId = req.body.roomId;
+
 
         console.log(roomId);
 
@@ -75,7 +79,7 @@ exports.newMessage = async (req , res ,next) => {
             id : uuidv4(),
             user,
             message,
-            time : new Date()
+            time : sendedTime 
         }
 
         room.chats.push(newChat)
